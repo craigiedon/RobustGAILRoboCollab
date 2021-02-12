@@ -9,11 +9,6 @@ import sys
 import argparse
 
 
-# TODO: Finish readme
-# TODO: Send email
-
-
-
 class NoisyReacherEnv(object):
     def __init__(self, action_noise_mean=0.0, action_noise_var=0.0, control_loop_enabled=False, headless=False):
         self.pr = PyRep()
