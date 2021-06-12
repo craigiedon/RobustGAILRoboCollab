@@ -14,9 +14,9 @@ import importlib.resources as ir
 class ReachEnv(gym.Env):
     metadata = {'render.modes': ['rgb_array']}
 
-    def __init__(self, render_mode: Union[None, str] = None):
-        self.action_noise_mean = 0.0
-        self.action_noise_variance = 0.0
+    def __init__(self, render_mode: Union[None, str] = None, action_noise_mean = 0.0, action_noise_var=0.0):
+        self.action_noise_mean = action_noise_mean
+        self.action_noise_variance = action_noise_var
         self.POS_MIN = np.array([0.8, -0.2, 1.0])
         self.POS_MAX = np.array([1.0, 0.2, 1.4])
 
@@ -49,7 +49,7 @@ class ReachEnv(gym.Env):
             spaces.Box(low=self.POS_MIN, high=self.POS_MAX)
         ))
 
-        self._config_env()
+        #self._config_env()
 
     def _config_env(self):
         pass
