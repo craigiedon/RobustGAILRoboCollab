@@ -14,7 +14,7 @@ import importlib.resources as ir
 class ReachEnv(gym.Env):
     metadata = {'render.modes': ['rgb_array']}
 
-    def __init__(self, render_mode: Union[None, str] = None, action_noise_mean = 0.0, action_noise_var=0.0):
+    def __init__(self, render_mode: Union[None, str] = None, action_noise_mean=0.0, action_noise_var=0.0, headless=False, control_loop_enabled=False):
         self.action_noise_mean = action_noise_mean
         self.action_noise_variance = action_noise_var
         self.POS_MIN = np.array([0.8, -0.2, 1.0])
@@ -23,7 +23,7 @@ class ReachEnv(gym.Env):
         self.pr = PyRep()
         # print("PACKAGE CONTENTS", list(ir.contents('gym_reach.scenes')))
         with ir.path("gym_reach.scenes", "scene_panda_reach_target.ttt") as p:
-            self.pr.launch(str(p), headless=False)
+            self.pr.launch(str(p), headless=headless)
 
         if render_mode is not None:
             self.camera = VisionSensor.create([512, 512],
@@ -32,7 +32,7 @@ class ReachEnv(gym.Env):
             print(self.camera.get_render_mode())
         self.pr.start()
         self.panda = Panda()
-        self.panda.set_control_loop_enabled(False)
+        self.panda.set_control_loop_enabled(control_loop_enabled)
         self.panda.set_motor_locked_at_zero_velocity(True)
         self.target = Shape.create(type=PrimitiveShape.SPHERE,
                                    size=[0.05, 0.05, 0.05],
@@ -43,13 +43,10 @@ class ReachEnv(gym.Env):
 
         self.action_space = spaces.Box(low=-2.0, high=2.0, shape=(7,))
 
-        self.observation_space = spaces.Tuple((
-            spaces.Box(low=np.array([-2.8973, -1.7628, -2.8973, -3.0718, -2.8973, -0.0175, -2.8973]),
-                       high=np.array([2.8973, 1.7628, 2.8973, 0.0698, 2.8973, 3.7525, 2.8973])),
-            spaces.Box(low=self.POS_MIN, high=self.POS_MAX)
-        ))
+        self.observation_space = spaces.Box(low=np.array([-2.8973, -1.7628, -2.8973, -3.0718, -2.8973, -0.0175, -2.8973, *self.POS_MIN]),
+                                            high=np.array([2.8973, 1.7628, 2.8973, 0.0698, 2.8973, 3.7525, 2.8973, *self.POS_MAX]))
 
-        #self._config_env()
+        # self._config_env()
 
     def _config_env(self):
         pass
@@ -65,7 +62,7 @@ class ReachEnv(gym.Env):
         target_pos = np.array(self.target.get_position())
 
         dist_to_target = np.linalg.norm(p_tip - target_pos)
-        return dist_to_target <= 1e-3
+        return dist_to_target <= 0.05
 
     def _get_state(self):
         return np.concatenate([self.panda.get_joint_positions(), self.target.get_position()])
@@ -89,16 +86,3 @@ class ReachEnv(gym.Env):
     def close(self):
         self.pr.stop()
         self.pr.shutdown()
-
-
-class ReachEnvNoisy(ReachEnv):
-    def _config_env(self):
-        self.action_noise_mean = 0.1
-        self.action_noise_variance = 0.1
-
-
-class ReachEnvPerfectExpert(ReachEnv):
-    def _config_env(self):
-        self.action_noise_mean = 0.0
-        self.action_noise_variance = 0.0
-        self.panda.set_control_loop_enabled(True)

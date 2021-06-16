@@ -39,13 +39,16 @@ def expert_perfect_example(n_episodes: int, ep_length: int):
         obs = expert_env.reset()
         ik_path = expert_env.panda.get_path(position=expert_env.target.get_position(), euler=[0, math.radians(180), 0])
         path_done = False
+        rewards = []
         for i in range(ep_length):
             if not path_done:
                 path_done = ik_path.step()
             obs, reward, done, info = expert_env.step(np.zeros(7))
-            print("reward: ", reward)
+            # print("reward: ", reward)
+            rewards.append(reward)
             if done:
                 print("Episode finished early after {} timesteps".format(i + 1))
+                print("Total Reward: ", np.sum(rewards))
                 break
 
     expert_env.close()
