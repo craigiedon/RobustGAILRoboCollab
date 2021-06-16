@@ -1,7 +1,0 @@
-scene_panda_reach_target.ttt
-setup.py
-gym_reach.egg-info/PKG-INFO
-gym_reach.egg-info/SOURCES.txt
-gym_reach.egg-info/dependency_links.txt
-gym_reach.egg-info/requires.txt
-gym_reach.egg-info/top_level.txt
