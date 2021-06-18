@@ -4,11 +4,12 @@ from os.path import join
 
 import gym
 import numpy as np
+from pyrep.errors import ConfigurationPathError
 
 
 class Agent(object):
     def act(self, obs) -> np.array:
-        return np.random.uniform(-1.0, 1.0, size=(7,))
+        return np.random.uniform(-1.0, 1.0, size=(4,))
 
     def learn(self, history):
         pass
@@ -16,8 +17,7 @@ class Agent(object):
 
 ## Example of running in noisy agent environment
 def noisy_agent_example(n_episodes: int, ep_length: int):
-    noisy_agent_env = gym.make("gym_reach:reachNoisy-v0", render_mode='rgb_array')
-    noisy_agent_env.reset()
+    noisy_agent_env = gym.make("gym_reach:reachDobotMulti-v0", render_mode='rgb_array')
     a = Agent()
     for episode in range(n_episodes):
         obs = noisy_agent_env.reset()
@@ -33,17 +33,19 @@ def noisy_agent_example(n_episodes: int, ep_length: int):
 
 ## Example of running in perfect expert environment (with demonstrations created by IK_Solver)
 def expert_perfect_example(n_episodes: int, ep_length: int):
-    expert_env = gym.make("gym_reach:reachPerfectExp-v0")
+    expert_env = gym.make("gym_reach:reachDobotFixed-v0", control_loop_enabled=True)
     expert_env.reset()
     for episode in range(n_episodes):
         obs = expert_env.reset()
-        ik_path = expert_env.panda.get_path(position=expert_env.target.get_position(), euler=[0, math.radians(180), 0])
+
+        ik_path = expert_env.dobot.get_path(position=expert_env.target_pos, euler=[-np.pi, 0.0, -np.pi / 2.0], ignore_collisions=True)
+
         path_done = False
         rewards = []
         for i in range(ep_length):
             if not path_done:
                 path_done = ik_path.step()
-            obs, reward, done, info = expert_env.step(np.zeros(7))
+            obs, reward, done, info = expert_env.step(np.zeros(4))
             # print("reward: ", reward)
             rewards.append(reward)
             if done:

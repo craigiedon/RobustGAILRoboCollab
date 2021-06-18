@@ -1,1 +1,1 @@
-from gym_reach.envs.reach_env import ReachEnv
+from gym_reach.envs.reach_env import ReachEnv, ReachEnvFixed, ReachDobotFixed, ReachDobotMulti

@@ -10,31 +10,10 @@ from pyrep.errors import ConfigurationError, ConfigurationPathError
 from utils.zfilter import ZFilter
 
 
-# def expert_perfect_example(n_episodes: int, ep_length: int):
-#     expert_env = gym.make("gym_reach:reachPerfectExp-v0")
-#     expert_env.reset()
-#     for episode in range(n_episodes):
-#         obs = expert_env.reset()
-#         ik_path = expert_env.panda.get_path(position=expert_env.target.get_position(), euler=[0, math.radians(180), 0])
-#         path_done = False
-#         rewards = []
-#         for i in range(ep_length):
-#             if not path_done:
-#                 path_done = ik_path.step()
-#             obs, reward, done, info = expert_env.step(np.zeros(7))
-#             # print("reward: ", reward)
-#             rewards.append(reward)
-#             if done:
-#                 print("Episode finished early after {} timesteps".format(i + 1))
-#                 print("Total Reward: ", np.sum(rewards))
-#                 break
-#
-#     expert_env.close()
-
 def run(max_expert_state_num: int):
     num_steps = 0
 
-    env_name = "gym_reach:reachNoisy-v0"
+    env_name = "gym_reach:reachNoisyFixed-v0"
     env = gym.make(env_name, control_loop_enabled=True)
     expert_traj = []
     state_only_expert_traj = []
@@ -60,11 +39,11 @@ def run(max_expert_state_num: int):
         for t in range(10000):
             if not path_done:
                 path_done = ik_path.step()
-                # action = np.array(env.panda.get_joint_target_velocities()).astype(np.float64)
 
             next_state, reward, done, _ = env.step(np.zeros(7))
+
             action = np.array(env.panda.get_joint_velocities()).astype(np.float64)
-            # print("Action: ", action)
+
             next_state = running_state(next_state)
 
             reward_episode += reward
